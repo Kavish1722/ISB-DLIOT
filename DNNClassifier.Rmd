@@ -1,0 +1,68 @@
+---
+title: "Tensor Classifier"
+author: "Kavish"
+date: "1/16/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(tfestimators)
+setwd("/Users/kavish/desktop/DLIOT")
+test <- read.csv("iris_test.csv")
+training <- read.csv("iris_training.csv")
+test
+```
+
+```{r}
+library(tfestimators)
+names(training)
+response <- function() "virginica"
+features <- function() setdiff(names(training), response())
+
+# split into train, test datasets
+# construct feature columns
+feature_columns <- feature_columns(
+  column_numeric(features())
+)
+
+# construct classifier
+classifier <- dnn_classifier(
+  feature_columns = feature_columns,
+  hidden_units = c(5, 10, 5),
+  n_classes = 3
+)
+
+# construct input function 
+iris_input_fn <- function(data) {
+  input_fn(data, features = features(), response = response())
+}
+
+# train classifier with training dataset
+train(classifier, input_fn = iris_input_fn(training))
+
+# valuate with test dataset
+predictions <- predict(classifier, input_fn = iris_input_fn(test))
+evaluation <- evaluate(classifier, input_fn = iris_input_fn(test))
+predictions1<- as.data.frame(predictions$classes)
+predictions1
+evaluation$loss
+evaluation$accuracy
+```
+
+
+
+```{r}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
